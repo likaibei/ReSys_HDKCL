@@ -221,3 +221,19 @@ def sq_hyp_distance(x, y):
     dist_c = artanh(mobius_add(-x, y).norm(dim=-1, p=2, keepdim=False))
     dist = dist_c * 2
     return dist ** 2
+    
+def ptransp0(self, x, u, c):
+        """Parallel transport of u from the origin to y."""
+        K = 1. / c
+        sqrtK = K ** 0.5
+        x0 = x.narrow(-1, 0, 1)
+        d = x.size(-1) - 1
+        y = x.narrow(-1, 1, d)
+        y_norm = torch.clamp(torch.norm(y, p=2, dim=-1, keepdim=True), min=MIN_NORM)
+        y_normalized = y / y_norm
+        v = torch.ones_like(x)
+        v[..., 0:1] = - y_norm
+        v[..., 1:] = (sqrtK - x0) * y_normalized
+        alpha = torch.sum(y_normalized * u[..., 1:], dim=-1, keepdim=True) / sqrtK
+        res = u - alpha * v
+        return  2 / lam * artanh(res) * x / res
