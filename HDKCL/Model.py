@@ -365,6 +365,11 @@ class GaussianDiffusion(nn.Module):
 	def q_sample(self, x_start, t, noise=None):
 		if noise is None:
 			noise = torch.randn_like(x_start)
+		else: 
+			mean = model_mean
+            		std = model_log_variance * torch.randn(mean.shape).to(device=self.mean.device)
+            		std_t = ptransp0(mean,self.proj_tan0(std))
+            		x = expmap(mean,std_t)
 		return self._extract_into_tensor(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start + self._extract_into_tensor(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
 	
 	def _extract_into_tensor(self, arr, timesteps, broadcast_shape):
